@@ -1,24 +1,25 @@
 {
   "nativescript": {
-    "id": "org.nativescript.demo",
+    "id": "com.devshackintl.https.demo",
     "tns-android": {
-      "version": "2.4.1"
+      "version": "4.2.0"
     },
     "tns-ios": {
-      "version": "2.4.0"
+      "version": "4.2.0"
     }
   },
   "dependencies": {
     "nativescript-https": "file:..",
-    "tns-core-modules": "latest"
+    "tns-core-modules": "^4.2.0"
   },
   "devDependencies": {
-    "tns-platform-declarations": "latest",
     "babel-traverse": "latest",
     "babel-types": "latest",
     "babylon": "latest",
     "lazy": "latest",
     "nativescript-dev-typescript": "latest",
+    "nativescript-dev-webpack": "^0.15.1",
+    "tns-platform-declarations": "latest",
     "typescript": "latest"
   }
 }
