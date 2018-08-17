@@ -1,10 +1,10 @@
 //
 
-import {EventData, Observable} from 'tns-core-modules/data/observable'
-import {Page} from 'tns-core-modules/ui/page'
-import {View} from 'tns-core-modules/ui/core/view'
-import {knownFolders} from 'tns-core-modules/file-system'
-import * as Https from 'nativescript-https'
+import {EventData, Observable} from 'tns-core-modules/data/observable';
+import {Page} from 'tns-core-modules/ui/page';
+import {View} from 'tns-core-modules/ui/core/view';
+import {knownFolders} from 'tns-core-modules/file-system';
+import * as Https from 'nativescript-https';
 
 
 export function onLoaded(args: EventData) {
@@ -17,6 +17,8 @@ export function onUnloaded(args: EventData) {
 }
 
 class MainPage extends Observable {
+
+    textView: string;
 
     constructor() {
         super()
@@ -43,8 +45,10 @@ export function testit(args: EventData) {
         // content: JSON.stringify({ dis: 'is awesome' })
     }).then(function (response) {
         console.log('Https.request response', response);
+        context.textView = JSON.stringify(response, null, 2);
     }).catch(function (error) {
-        console.error('Https.request error', error)
+        console.error('Https.request error', error);
+        context.textView = JSON.stringify(error, null, 2);
     })
 
 }

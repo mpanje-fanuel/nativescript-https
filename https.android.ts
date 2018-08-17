@@ -144,7 +144,7 @@ function getClient(reload: boolean = false): okhttp3.OkHttpClient {
             console.warn('nativescript-https > Undefined host or certificate. SSL pinning NOT working!!!')
         }
     }
-    Client = client.build()
+    Client = client.build();
     return Client
 }
 
@@ -157,8 +157,10 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
     return new Promise(function (resolve, reject) {
         try {
             let client = getClient();
-
-            const urlBuilder = okhttp3.HttpUrl.parse(opts.url).newBuilder();
+            console.log("Attempting to construct URL");
+            const httpUrl: okhttp3.HttpUrl = okhttp3.HttpUrl.parse(opts.url);
+            const urlBuilder = httpUrl.newBuilder();
+            console.log("Created newBuilder");
             if (opts.params) {
                 Object.keys(opts.params).forEach(param => {
                     urlBuilder.addQueryParameter(param, opts.params[param] as any);

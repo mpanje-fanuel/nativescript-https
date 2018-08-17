@@ -11,7 +11,7 @@
             <Button text="Test HTTPS" tap="testit" />
             <Button text="Enable SSL" tap="enableSSL" />
             <Button text="Disable SSL" tap="disableSSL" />
-            <TextView text=""></TextView>
+            <TextView text="{{ responseText }}"/>
         </StackLayout>
     </GridLayout>
 
