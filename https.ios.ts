@@ -4,6 +4,7 @@ import * as application from 'tns-core-modules/application'
 import {HttpRequestOptions, Headers, HttpResponse} from 'tns-core-modules/http'
 import {isDefined, isNullOrUndefined, isObject} from 'tns-core-modules/utils/types'
 import * as Https from './https.common'
+import {HttpsResponse} from "./https.common";
 
 
 interface Ipolicies {
@@ -83,7 +84,9 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
                             } catch (e) {
                                 console.log("nativescript-https: Response JSON Parse Error", e, e.stack, content);
                             }
-                            return content;
+                            return <HttpsResponse>{
+                                content: content
+                            };
                         }
                     })
                 }
@@ -93,35 +96,7 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
             reject(error)
         }
 
-    }).then(function (AFResponse: {
-        task: NSURLSessionDataTask
-        content: any
-        reason?: string
-    }) {
-        console.log("nativescript-https: (request) AF Send Then");
-        let send: Https.HttpsResponse = {
-            content: AFResponse.content,
-            headers: {},
-        };
-
-        console.log("nativescript-https: (request) AF Send Then", send);
-
-        let response = AFResponse.task.response as NSHTTPURLResponse;
-        if (!isNullOrUndefined(response)) {
-            send.statusCode = response.statusCode;
-            let dict = response.allHeaderFields;
-            dict.enumerateKeysAndObjectsUsingBlock(function (k, v) {
-                send.headers[k] = v
-            })
-        }
-
-        if (AFResponse.reason) {
-            send.reason = AFResponse.reason
-        }
-        console.log("nativescript-https: (request) AF Send Then Done ? ");
-        return Promise.resolve(send)
-
-    })
+    });
 }
 
 export * from './https.common'
