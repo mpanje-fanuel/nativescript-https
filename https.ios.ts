@@ -120,6 +120,8 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
                     Object.keys(cont).forEach(function (key) {
                         dict.setValueForKey(cont[key] as any, key)
                     })
+                } else {
+                    dict = <any>opts.body;
                 }
             }
 
