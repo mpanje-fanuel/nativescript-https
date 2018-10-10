@@ -232,6 +232,7 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
                     try {
                         content = JSON.parse(content)
                     } catch (e) {
+                        console.log("nativescript-https: (Response) JSON Parse Error", e, e.stack);
                     }
 
                     let statusCode = response.code();
