@@ -143,6 +143,7 @@ function AFFailure(resolve, reject, task: NSURLSessionDataTask, error: NSError) 
         resolve({task, content, reason})
     } else {
         console.log("nativescript-https: (AFFailure) No Error Available...", error);
+        resolve({task});
     }
 }
 
