@@ -43,7 +43,8 @@ function AFSuccess(resolve, task, data) {
         try {
             content = JSON.parse(content);
         }
-        catch (e) { }
+        catch (e) {
+        }
     }
     else {
         content = data;
@@ -51,23 +52,32 @@ function AFSuccess(resolve, task, data) {
     resolve({ task: task, content: content });
 }
 function AFFailure(resolve, reject, task, error) {
-    var data = error.userInfo.valueForKey(AFNetworkingOperationFailingURLResponseDataErrorKey);
-    var body = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding).toString();
-    try {
-        body = JSON.parse(body);
+    console.log('nativescript-https: (AFFailure)', error);
+    if (error && error.userInfo) {
+        var data = error.userInfo.valueForKey(AFNetworkingOperationFailingURLResponseDataErrorKey);
+        var body = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding).toString();
+        try {
+            body = JSON.parse(body);
+        }
+        catch (e) {
+            console.log('nativescript-https: (AFFailure) JSON Parse Error', e, e.stack);
+        }
+        var content = {
+            body: body,
+            description: error.description,
+            reason: error.localizedDescription,
+            url: null
+        };
+        if (policies.secured == true) {
+            content.description = 'nativescript-https > Invalid SSL certificate! ' + content.description;
+        }
+        var reason = error.localizedDescription;
+        resolve({ task: task, content: content, reason: reason });
     }
-    catch (e) { }
-    var content = {
-        body: body,
-        description: error.description,
-        reason: error.localizedDescription,
-        url: error.userInfo.objectForKey('NSErrorFailingURLKey').description
-    };
-    if (policies.secured == true) {
-        content.description = 'nativescript-https > Invalid SSL certificate! ' + content.description;
+    else {
+        console.log('nativescript-https: (AFFailure) Error but not content...');
+        resolve({ task: task });
     }
-    var reason = error.localizedDescription;
-    resolve({ task: task, content: content, reason: reason });
 }
 function request(opts) {
     return new Promise(function (resolve, reject) {

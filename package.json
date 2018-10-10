@@ -53,5 +53,6 @@
     "tns-core-modules": "latest",
     "tns-platform-declarations": "latest",
     "typescript": "latest"
-  }
+  },
+  "dependencies": {}
 }
