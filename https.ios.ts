@@ -95,9 +95,9 @@ function AFSuccess(resolve, task: NSURLSessionDataTask, data: NSDictionary<strin
 }
 
 function AFFailure(resolve, reject, task: NSURLSessionDataTask, error: NSError) {
-    // console.error('AFFailure')
+    console.error('AFFailure')
     // console.log('error.description', error.description)
-    // console.log('error.userInfo.description', error.userInfo.description)
+    console.log('error.userInfo.description', error.userInfo.description)
     // console.log('error.localizedDescription', error.localizedDescription)
     let data: NSData = error.userInfo.valueForKey(AFNetworkingOperationFailingURLResponseDataErrorKey);
     let body = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding).toString();
@@ -106,15 +106,12 @@ function AFFailure(resolve, reject, task: NSURLSessionDataTask, error: NSError) 
     } catch (e) {
     }
 
-    let userInfoFailingUrl = error.userInfo.objectForKey('NSErrorFailingURLKey') != null
-        ? error.userInfo.objectForKey('NSErrorFailingURLKey').description
-        : null;
 
     let content: any = {
         body,
         description: error.description,
         reason: error.localizedDescription,
-        url: userInfoFailingUrl
+        url: null
     };
     // console.log('content.url', content.url)
     // try {
