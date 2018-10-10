@@ -108,7 +108,6 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
                 send.headers[k] = v
             })
         }
-
         if (AFResponse.reason) {
             send.reason = AFResponse.reason
         }
