@@ -44,6 +44,7 @@ export function disableSSLPinning() {
 }
 
 export function request(options: Https.HttpsRequestOptions): Promise<Https.HttpsResponse> {
+    console.log("nativescript-https: (request) Request: ", options);
     return new Promise(function (resolve, reject) {
         try {
 
@@ -66,11 +67,14 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
             manager.requestSerializer.allowsCellularAccess = true;
             manager.securityPolicy = (policies.secured == true) ? policies.secure : policies.def;
 
-            manager.session.dataTaskWithRequestCompletionHandler(request, function (data: NSData, response: NSHTTPURLResponse, error: NSError) {
+            console.log("nativescript-https: (request) AF Send: ", request);
 
+            manager.session.dataTaskWithRequestCompletionHandler(request, function (data: NSData, response: NSHTTPURLResponse, error: NSError) {
                 if (error) {
+                    console.log("nativescript-https: (request) AF Send Error", error);
                     reject(new Error(error.localizedDescription));
                 } else {
+                    console.log("nativescript-https: (request) AF Send Response", data);
                     resolve({
                         content: (data: NSData) => {
                             let content = NSString.alloc().initWithDataEncoding(data, NSASCIIStringEncoding).toString();
@@ -94,11 +98,13 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
         content: any
         reason?: string
     }) {
-
+        console.log("nativescript-https: (request) AF Send Then");
         let send: Https.HttpsResponse = {
             content: AFResponse.content,
             headers: {},
         };
+
+        console.log("nativescript-https: (request) AF Send Then", send);
 
         let response = AFResponse.task.response as NSHTTPURLResponse;
         if (!isNullOrUndefined(response)) {
@@ -111,6 +117,7 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
         if (AFResponse.reason) {
             send.reason = AFResponse.reason
         }
+        console.log("nativescript-https: (request) AF Send Then Done ? ");
         return Promise.resolve(send)
 
     })
