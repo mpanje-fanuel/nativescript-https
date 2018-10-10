@@ -1,10 +1,9 @@
 //
 
 import * as application from 'tns-core-modules/application'
-import { HttpRequestOptions, Headers, HttpResponse } from 'tns-core-modules/http'
-import { isDefined, isNullOrUndefined, isObject } from 'tns-core-modules/utils/types'
+import {HttpRequestOptions, Headers, HttpResponse} from 'tns-core-modules/http'
+import {isDefined, isNullOrUndefined, isObject} from 'tns-core-modules/utils/types'
 import * as Https from './https.common'
-
 
 
 interface Ipolicies {
@@ -12,6 +11,7 @@ interface Ipolicies {
     secured: boolean
     secure?: AFSecurityPolicy
 }
+
 let policies: Ipolicies = {
     def: AFSecurityPolicy.defaultPolicy(),
     secured: false,
@@ -37,12 +37,13 @@ export function enableSSLPinning(options: Https.HttpsSSLPinningOptions) {
     policies.secured = true;
     console.log('nativescript-https > Enabled SSL pinning')
 }
+
 export function disableSSLPinning() {
     policies.secured = false;
     console.log('nativescript-https > Disabled SSL pinning')
 }
-console.info('nativescript-https > Disabled SSL pinning by default');
 
+console.info('nativescript-https > Disabled SSL pinning by default');
 
 
 function AFSuccess(resolve, task: NSURLSessionDataTask, data: NSDictionary<string, any> & NSData & NSArray<any>) {
@@ -83,62 +84,70 @@ function AFSuccess(resolve, task: NSURLSessionDataTask, data: NSDictionary<strin
 
         try {
             content = JSON.parse(content)
-        } catch (e) { }
+        } catch (e) {
+        }
 
     } else {
         content = data
     }
 
-    resolve({ task, content })
+    resolve({task, content})
 }
 
 function AFFailure(resolve, reject, task: NSURLSessionDataTask, error: NSError) {
-    // console.error('AFFailure')
+
+    console.log('nativescript-https: (AFFailure) ', error, reject);
     // console.log('error.description', error.description)
     // console.log('error.userInfo.description', error.userInfo.description)
     // console.log('error.localizedDescription', error.localizedDescription)
-    let data: NSData = error.userInfo.valueForKey(AFNetworkingOperationFailingURLResponseDataErrorKey);
-    let body = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding).toString();
-    try {
-        body = JSON.parse(body)
-    } catch (e) { }
-    let content: any = {
-        body,
-        description: error.description,
-        reason: error.localizedDescription,
-        url: error.userInfo.objectForKey('NSErrorFailingURLKey').description
-    };
-    // console.log('content.url', content.url)
-    // try {
-    // 	content.body = JSON.parse(body.description)
-    // } catch (e) {
-    if (policies.secured == true) {
+
+    if (error && error.userInfo) {
+        let data: NSData = error.userInfo.valueForKey(AFNetworkingOperationFailingURLResponseDataErrorKey);
+        let body = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding).toString();
+        try {
+            body = JSON.parse(body)
+        } catch (e) {
+        }
+        let content: any = {
+            body,
+            description: error.description,
+            reason: error.localizedDescription,
+            url: error != null && error.userInfo != null ? error.userInfo.objectForKey('NSErrorFailingURLKey').description : null
+        };
+        // console.log('content.url', content.url)
+        // try {
+        // 	content.body = JSON.parse(body.description)
+        // } catch (e) {
+        if (policies.secured == true) {
+            // console.log('error.description', error.description)
+            // console.log('error.userInfo.description', error.userInfo.description)
+            content.description = 'nativescript-https > Invalid SSL certificate! ' + content.description
+            // return reject(content)
+        }
+        // }
         // console.log('error.description', error.description)
-        // console.log('error.userInfo.description', error.userInfo.description)
-        content.description = 'nativescript-https > Invalid SSL certificate! ' + content.description
-        // return reject(content)
+        // console.keys('error', error)
+        // console.keys('error.userInfo', error.userInfo)
+        // error.userInfo.enumerateKeysAndObjectsUsingBlock(function(k, v) {
+        // 	console.log('k', k)
+        // 	console.log('v.description', v.description)
+        // })
+        // let keys = error.userInfo.allKeysForObject(error.userInfo)
+        // console.log('keys.description', keys.description)
+        // let url = error.valueForKey('URL')
+        // console.error('url', url)
+        // if (!isNullOrUndefined(task.response)) {
+        // 	content.URL = task.response.URL
+        // }
+        let reason = error.localizedDescription;
+        resolve({task, content, reason})
+    } else {
+        console.log("nativescript-https: (AFFailure) No Error Available...", error);
     }
-    // }
-    // console.log('error.description', error.description)
-    // console.keys('error', error)
-    // console.keys('error.userInfo', error.userInfo)
-    // error.userInfo.enumerateKeysAndObjectsUsingBlock(function(k, v) {
-    // 	console.log('k', k)
-    // 	console.log('v.description', v.description)
-    // })
-    // let keys = error.userInfo.allKeysForObject(error.userInfo)
-    // console.log('keys.description', keys.description)
-    // let url = error.valueForKey('URL')
-    // console.error('url', url)
-    // if (!isNullOrUndefined(task.response)) {
-    // 	content.URL = task.response.URL
-    // }
-    let reason = error.localizedDescription;
-    resolve({ task, content, reason })
 }
 
 export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsResponse> {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         try {
 
             let manager = AFHTTPSessionManager.manager();
@@ -159,7 +168,7 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
 
             let heads = opts.headers;
             if (heads) {
-                Object.keys(heads).forEach(function(key) {
+                Object.keys(heads).forEach(function (key) {
                     manager.requestSerializer.setValueForHTTPHeaderField(heads[key] as any, key);
                 });
             }
@@ -169,7 +178,7 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
                 let cont = opts.body;
                 if (isObject(cont)) {
                     dict = NSMutableDictionary.new<string, any>();
-                    Object.keys(cont).forEach(function(key) {
+                    Object.keys(cont).forEach(function (key) {
                         dict.setValueForKey(cont[key] as any, key)
                     })
                 }
@@ -207,7 +216,7 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
             reject(error)
         }
 
-    }).then(function(AFResponse: {
+    }).then(function (AFResponse: {
         task: NSURLSessionDataTask
         content: any
         reason?: string
@@ -222,7 +231,7 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
         if (!isNullOrUndefined(response)) {
             sendi.statusCode = response.statusCode;
             let dict = response.allHeaderFields;
-            dict.enumerateKeysAndObjectsUsingBlock(function(k, v) {
+            dict.enumerateKeysAndObjectsUsingBlock(function (k, v) {
                 sendi.headers[k] = v
             })
         }
@@ -234,7 +243,6 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
 
     })
 }
-
 
 
 export * from './https.common'
