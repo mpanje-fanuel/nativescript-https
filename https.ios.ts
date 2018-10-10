@@ -1,7 +1,3 @@
-// 
-
-import * as application from 'tns-core-modules/application'
-import {HttpRequestOptions, Headers, HttpResponse} from 'tns-core-modules/http'
 import {isDefined, isNullOrUndefined, isObject} from 'tns-core-modules/utils/types'
 import * as Https from './https.common'
 
@@ -20,7 +16,6 @@ policies.def.allowInvalidCertificates = true;
 policies.def.validatesDomainName = false;
 
 export function enableSSLPinning(options: Https.HttpsSSLPinningOptions) {
-    // console.log('options', options)
     if (!policies.secure) {
         policies.secure = AFSecurityPolicy.policyWithPinningMode(AFSSLPinningMode.PublicKey);
         let allowInvalidCertificates = (isDefined(options.allowInvalidCertificates)) ? options.allowInvalidCertificates : false;
@@ -28,10 +23,6 @@ export function enableSSLPinning(options: Https.HttpsSSLPinningOptions) {
         let validatesDomainName = (isDefined(options.validatesDomainName)) ? options.validatesDomainName : true;
         policies.secure.validatesDomainName = validatesDomainName;
         let data = NSData.dataWithContentsOfFile(options.certificate);
-        // console.log('data.description', data.description)
-        // console.log('data.bytes', data.bytes)
-        // console.log('data.base64Encoding()', data.base64Encoding())
-        // console.log('data.length', data.length)
         policies.secure.pinnedCertificates = NSSet.setWithObject(data)
     }
     policies.secured = true;
@@ -50,40 +41,17 @@ function AFSuccess(resolve, task: NSURLSessionDataTask, data: NSDictionary<strin
     // console.log('AFSuccess')
     let content: any;
     if (data && data.class) {
-        // console.log('data.class().name', data.class().name)
         if (data.enumerateKeysAndObjectsUsingBlock || data.class().name == 'NSArray') {
-            // content = {}
-            // data.enumerateKeysAndObjectsUsingBlock(function(k, v) {
-            // 	console.log('v.description', v.description)
-            // 	content[k] = v
-            // })
             let serial = NSJSONSerialization.dataWithJSONObjectOptionsError(data, NSJSONWritingOptions.PrettyPrinted);
             content = NSString.alloc().initWithDataEncoding(serial, NSUTF8StringEncoding).toString()
-            // console.log('content', content)
         } else if (data.class().name == 'NSData') {
             content = NSString.alloc().initWithDataEncoding(data, NSASCIIStringEncoding).toString()
-            // } else if (data.class().name == 'NSArray') {
-            // 	content = []
-            // 	let i: number, len: number = data.count
-            // 	for (i = 0; i < len; i++) {
-            // 		let item
-            // 		let result: NSDictionary<string, any> = data[i]
-            // 		if (result.enumerateKeysAndObjectsUsingBlock) {
-            // 			item = {}
-            // 			result.enumerateKeysAndObjectsUsingBlock(function(k, v) {
-            // 				item[k] = v
-            // 			})
-            // 		} else {
-            // 			item = data[i]
-            // 		}
-            // 		content.push(item)
-            // 	}
         } else {
             content = data
         }
 
         try {
-            content = JSON.parse(content)
+            content = JSON.parse(content);
         } catch (e) {
         }
 
@@ -91,7 +59,7 @@ function AFSuccess(resolve, task: NSURLSessionDataTask, data: NSDictionary<strin
         content = data
     }
 
-    resolve({task, content})
+    resolve({task, content});
 }
 
 function AFFailure(resolve, reject, task: NSURLSessionDataTask, error: NSError) {

@@ -54,7 +54,5 @@
     "tns-platform-declarations": "latest",
     "typescript": "latest"
   },
-  "dependencies": {
-    "nativescript-https": "latest"
-  }
+  "dependencies": {}
 }
