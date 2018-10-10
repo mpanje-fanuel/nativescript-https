@@ -152,12 +152,7 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
 
             let manager = AFHTTPSessionManager.manager();
 
-            if (opts.headers && opts.headers['Content-Type'] == 'application/json') {
-                manager.requestSerializer = AFJSONRequestSerializer.serializer();
-                manager.responseSerializer = AFJSONResponseSerializer.serializerWithReadingOptions(NSJSONReadingOptions.AllowFragments)
-            } else {
-                manager.requestSerializer = AFHTTPRequestSerializer.serializer()
-            }
+            manager.requestSerializer = AFHTTPRequestSerializer.serializer()
 
             manager.requestSerializer.allowsCellularAccess = true;
             manager.securityPolicy = (policies.secured == true) ? policies.secure : policies.def;
