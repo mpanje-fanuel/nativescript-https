@@ -90,12 +90,11 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
                         }
                     })
                 }
+                console.log("HERE? ");
             });
-
         } catch (error) {
             reject(error)
         }
-
     });
 }
 
