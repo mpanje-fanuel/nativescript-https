@@ -103,7 +103,7 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
             manager.requestSerializer = AFHTTPRequestSerializer.serializer()
             manager.requestSerializer.allowsCellularAccess = true;
             manager.securityPolicy = (policies.secured == true) ? policies.secure : policies.def;
-            manager.requestSerializer.timeoutInterval = 10;
+
 
             let heads = opts.headers;
             if (heads) {
@@ -112,16 +112,15 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
                 });
             }
 
-            let dict: NSMutableDictionary<string, any> = null;
+            let content;
             if (opts.body) {
-                let cont = opts.body;
-                if (isObject(cont)) {
-                    dict = NSMutableDictionary.new<string, any>();
-                    Object.keys(cont).forEach(function (key) {
-                        dict.setValueForKey(cont[key] as any, key)
+                if (isObject(opts.body)) {
+                    content = NSMutableDictionary.new<string, any>();
+                    Object.keys(opts.body).forEach(function (key) {
+                        content.setValueForKey(opts.body[key] as any, key)
                     })
                 } else {
-                    dict = <any>opts.body;
+                    content = <string> opts.body;
                 }
             }
 
@@ -133,12 +132,17 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
                 'PATCH': 'PATCHParametersSuccessFailure',
                 'HEAD': 'HEADParametersSuccessFailure',
             };
-            manager[methods[opts.method]](opts.url, dict, function success(task: NSURLSessionDataTask, data: any) {
-                AFSuccess(resolve, task, data)
-            }, function failure(task, error) {
-                AFFailure(resolve, reject, task, error)
-            })
 
+            console.log("CONTENT: ", content);
+
+            manager[methods[opts.method]](
+                opts.url,
+                content,
+                function success(task: NSURLSessionDataTask, data: any) {
+                    AFSuccess(resolve, task, data)
+                }, function failure(task, error) {
+                    AFFailure(resolve, reject, task, error)
+                });
 
         } catch (error) {
             reject(error)
