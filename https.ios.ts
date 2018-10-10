@@ -153,7 +153,7 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
 
             let manager = AFHTTPSessionManager.manager();
 
-            manager.requestSerializer = AFHTTPRequestSerializer.serializer()
+            manager.requestSerializer = AFJSONRequestSerializer.serializer();
 
             manager.requestSerializer.allowsCellularAccess = true;
             manager.securityPolicy = (policies.secured == true) ? policies.secure : policies.def;
@@ -177,26 +177,15 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
                 'PATCH': 'PATCHParametersSuccessFailure',
                 'HEAD': 'HEADParametersSuccessFailure',
             };
-            manager[methods[opts.method]](opts.url, requestBody, function success(task: NSURLSessionDataTask, data: any) {
-                AFSuccess(resolve, task, data)
-            }, function failure(task, error) {
-                AFFailure(resolve, reject, task, error)
-            })
-
-            // if (opts.method == 'GET') {
-            // 	manager.GETParametersSuccessFailure(opts.url, dict, function success(task: NSURLSessionDataTask, data: any) {
-            // 		AFSuccess(resolve, task, data)
-            // 	}, function failure(task, error) {
-            // 		AFFailure(resolve, reject, task, error)
-            // 	})
-            // } else if (opts.method == 'POST') {
-            // 	manager.POSTParametersSuccessFailure(opts.url, dict, function success(task: NSURLSessionDataTask, data: any) {
-            // 		AFSuccess(resolve, task, data)
-            // 	}, function failure(task, error) {
-            // 		AFFailure(resolve, reject, task, error)
-            // 	})
-            // }
-
+            manager[methods[opts.method]](
+                opts.url,
+                requestBody,
+                function success(task: NSURLSessionDataTask, data: any) {
+                    AFSuccess(resolve, task, data)
+                },
+                function failure(task, error) {
+                    AFFailure(resolve, reject, task, error)
+                });
         } catch (error) {
             reject(error)
         }
@@ -207,24 +196,24 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
         reason?: string
     }) {
 
-        let sendi: Https.HttpsResponse = {
+        let send: Https.HttpsResponse = {
             content: AFResponse.content,
             headers: {},
         };
 
         let response = AFResponse.task.response as NSHTTPURLResponse;
         if (!isNullOrUndefined(response)) {
-            sendi.statusCode = response.statusCode;
+            send.statusCode = response.statusCode;
             let dict = response.allHeaderFields;
             dict.enumerateKeysAndObjectsUsingBlock(function (k, v) {
-                sendi.headers[k] = v
+                send.headers[k] = v
             })
         }
 
         if (AFResponse.reason) {
-            sendi.reason = AFResponse.reason
+            send.reason = AFResponse.reason
         }
-        return Promise.resolve(sendi)
+        return Promise.resolve(send)
 
     })
 }
