@@ -90,7 +90,6 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
                         }
                     })
                 }
-                console.log("HERE? ");
             }).resume();
         } catch (error) {
             console.log("nativescript-https: (request) AF Error", error, error.stack);
