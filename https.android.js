@@ -145,7 +145,12 @@ function request(opts) {
             else {
                 var type = opts.headers['Content-Type'] || 'application/json';
                 var body = opts.body || {};
-                request_1[methods[opts.method]](okhttp3.RequestBody.create(okhttp3.MediaType.parse(type), body));
+                try {
+                    body = JSON.stringify(body);
+                }
+                catch (e) {
+                }
+                request_1[methods[opts.method]](okhttp3.RequestBody.create(okhttp3.MediaType.parse("text/plain"), body));
             }
             android.os.StrictMode.setThreadPolicy(strictModeThreadPolicyPermitAll);
             client.newCall(request_1.build()).enqueue(new okhttp3.Callback({
@@ -155,7 +160,6 @@ function request(opts) {
                         content = JSON.parse(content);
                     }
                     catch (e) {
-                        console.log("nativescript-https: (Response) JSON Parse Error", e, e.stack);
                     }
                     var statusCode = response.code();
                     var headers = {};
