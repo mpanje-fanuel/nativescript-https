@@ -28,6 +28,7 @@ function disableSSLPinning() {
 exports.disableSSLPinning = disableSSLPinning;
 console.info('nativescript-https > Disabled SSL pinning by default');
 function AFSuccess(resolve, task, data) {
+    console.log('AFSuccess', data);
     var content;
     if (data && data.class) {
         if (data.enumerateKeysAndObjectsUsingBlock || data.class().name == 'NSArray') {
@@ -83,30 +84,25 @@ function request(opts) {
     return new Promise(function (resolve, reject) {
         try {
             var manager_1 = AFHTTPSessionManager.manager();
-            if (opts.headers && opts.headers['Content-Type'] == 'application/json') {
-                manager_1.requestSerializer = AFJSONRequestSerializer.serializer();
-                manager_1.responseSerializer = AFJSONResponseSerializer.serializerWithReadingOptions(4);
-            }
-            else {
-                manager_1.requestSerializer = AFHTTPRequestSerializer.serializer();
-            }
+            manager_1.requestSerializer = AFHTTPRequestSerializer.serializer();
             manager_1.requestSerializer.allowsCellularAccess = true;
             manager_1.securityPolicy = (policies.secured == true) ? policies.secure : policies.def;
-            manager_1.requestSerializer.timeoutInterval = 10;
             var heads_1 = opts.headers;
             if (heads_1) {
                 Object.keys(heads_1).forEach(function (key) {
                     manager_1.requestSerializer.setValueForHTTPHeaderField(heads_1[key], key);
                 });
             }
-            var dict_1 = null;
+            var content_1;
             if (opts.body) {
-                var cont_1 = opts.body;
-                if (types_1.isObject(cont_1)) {
-                    dict_1 = NSMutableDictionary.new();
-                    Object.keys(cont_1).forEach(function (key) {
-                        dict_1.setValueForKey(cont_1[key], key);
+                if (types_1.isObject(opts.body)) {
+                    content_1 = NSMutableDictionary.new();
+                    Object.keys(opts.body).forEach(function (key) {
+                        content_1.setValueForKey(opts.body[key], key);
                     });
+                }
+                else {
+                    content_1 = opts.body;
                 }
             }
             var methods = {
@@ -117,7 +113,8 @@ function request(opts) {
                 'PATCH': 'PATCHParametersSuccessFailure',
                 'HEAD': 'HEADParametersSuccessFailure',
             };
-            manager_1[methods[opts.method]](opts.url, dict_1, function success(task, data) {
+            console.log("CONTENT: ", content_1);
+            manager_1[methods[opts.method]](opts.url, content_1, function success(task, data) {
                 AFSuccess(resolve, task, data);
             }, function failure(task, error) {
                 AFFailure(resolve, reject, task, error);

@@ -113,7 +113,10 @@ function request(opts) {
     return new Promise(function (resolve, reject) {
         try {
             var client = getClient();
-            var urlBuilder_1 = okhttp3.HttpUrl.parse(opts.url).newBuilder();
+            console.log("Attempting to construct URL");
+            var httpUrl = okhttp3.HttpUrl.parse(opts.url);
+            var urlBuilder_1 = httpUrl.newBuilder();
+            console.log("Created newBuilder");
             if (opts.params) {
                 Object.keys(opts.params).forEach(function (param) {
                     urlBuilder_1.addQueryParameter(param, opts.params[param]);
@@ -142,11 +145,6 @@ function request(opts) {
             else {
                 var type = opts.headers['Content-Type'] || 'application/json';
                 var body = opts.body || {};
-                try {
-                    body = JSON.stringify(body);
-                }
-                catch (e) {
-                }
                 request_1[methods[opts.method]](okhttp3.RequestBody.create(okhttp3.MediaType.parse(type), body));
             }
             android.os.StrictMode.setThreadPolicy(strictModeThreadPolicyPermitAll);
@@ -157,6 +155,7 @@ function request(opts) {
                         content = JSON.parse(content);
                     }
                     catch (e) {
+                        console.log("nativescript-https: (Response) JSON Parse Error", e, e.stack);
                     }
                     var statusCode = response.code();
                     var headers = {};
