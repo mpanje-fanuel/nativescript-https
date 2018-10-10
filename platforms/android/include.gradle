@@ -5,10 +5,6 @@ dependencies {
 }
 
 android {
-	productFlavors {
-		"nativescripthttps" {
-			dimension "nativescripthttps"
-		}
-	}
+	
 }
 

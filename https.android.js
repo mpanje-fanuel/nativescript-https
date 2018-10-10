@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var types_1 = require("utils/types");
+var types_1 = require("tns-core-modules/utils/types");
 var peer = {
     enabled: false,
     allowInvalidCertificates: false,
@@ -24,7 +24,8 @@ function enableSSLPinning(options) {
                     inputStream.close();
                 }
             }
-            catch (e) { }
+            catch (e) {
+            }
             console.error('nativescript-https > enableSSLPinning error', error);
             return;
         }
@@ -112,8 +113,14 @@ function request(opts) {
     return new Promise(function (resolve, reject) {
         try {
             var client = getClient();
+            var urlBuilder_1 = okhttp3.HttpUrl.parse(opts.url).newBuilder();
+            if (opts.params) {
+                Object.keys(opts.params).forEach(function (param) {
+                    urlBuilder_1.addQueryParameter(param, opts.params[param]);
+                });
+            }
             var request_1 = new okhttp3.Request.Builder();
-            request_1.url(opts.url);
+            request_1.url(urlBuilder_1.build());
             if (opts.headers) {
                 Object.keys(opts.headers).forEach(function (key) {
                     request_1.addHeader(key, opts.headers[key]);
@@ -138,7 +145,8 @@ function request(opts) {
                 try {
                     body = JSON.stringify(body);
                 }
-                catch (e) { }
+                catch (e) {
+                }
                 request_1[methods[opts.method]](okhttp3.RequestBody.create(okhttp3.MediaType.parse(type), body));
             }
             android.os.StrictMode.setThreadPolicy(strictModeThreadPolicyPermitAll);
@@ -148,7 +156,8 @@ function request(opts) {
                     try {
                         content = JSON.parse(content);
                     }
-                    catch (e) { }
+                    catch (e) {
+                    }
                     var statusCode = response.code();
                     var headers = {};
                     var heads = response.headers();

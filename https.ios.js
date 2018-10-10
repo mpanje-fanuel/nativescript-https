@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var types_1 = require("utils/types");
+var types_1 = require("tns-core-modules/utils/types");
 var policies = {
     def: AFSecurityPolicy.defaultPolicy(),
     secured: false,
@@ -79,7 +79,6 @@ function request(opts) {
             }
             else {
                 manager_1.requestSerializer = AFHTTPRequestSerializer.serializer();
-                manager_1.responseSerializer = AFHTTPResponseSerializer.serializer();
             }
             manager_1.requestSerializer.allowsCellularAccess = true;
             manager_1.securityPolicy = (policies.secured == true) ? policies.secure : policies.def;
