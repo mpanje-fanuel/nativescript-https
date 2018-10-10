@@ -200,7 +200,7 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
                 } catch (e) {
                 }
                 request[methods[opts.method]](okhttp3.RequestBody.create(
-                    okhttp3.MediaType.parse("text/plain"),
+                    okhttp3.MediaType.parse(type),
                     body
                 ))
             }
