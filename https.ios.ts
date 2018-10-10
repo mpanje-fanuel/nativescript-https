@@ -157,11 +157,8 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
                 manager.responseSerializer = AFJSONResponseSerializer.serializerWithReadingOptions(NSJSONReadingOptions.AllowFragments)
             } else {
                 manager.requestSerializer = AFHTTPRequestSerializer.serializer()
-                // manager.responseSerializer = AFXMLParserResponseSerializer.serializer()
-                // manager.responseSerializer = AFHTTPResponseSerializer.serializer()
-                // manager.responseSerializer.acceptableContentTypes = NSSet.setWithObject('text/html')
-                // manager.responseSerializer.acceptableContentTypes = NSSet.setWithObject('application/json')
             }
+
             manager.requestSerializer.allowsCellularAccess = true;
             manager.securityPolicy = (policies.secured == true) ? policies.secure : policies.def;
             manager.requestSerializer.timeoutInterval = 10;
@@ -173,16 +170,8 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
                 });
             }
 
-            let dict: NSMutableDictionary<string, any> = null;
-            if (opts.body) {
-                let cont = opts.body;
-                if (isObject(cont)) {
-                    dict = NSMutableDictionary.new<string, any>();
-                    Object.keys(cont).forEach(function (key) {
-                        dict.setValueForKey(cont[key] as any, key)
-                    })
-                }
-            }
+            let jsonString = NSString.stringWithString(JSON.stringify(opts.body));
+            let requestBody = new NSData(jsonString.dataUsingEncoding(NSUTF8StringEncoding));
 
             let methods = {
                 'GET': 'GETParametersSuccessFailure',
@@ -192,7 +181,7 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
                 'PATCH': 'PATCHParametersSuccessFailure',
                 'HEAD': 'HEADParametersSuccessFailure',
             };
-            manager[methods[opts.method]](opts.url, dict, function success(task: NSURLSessionDataTask, data: any) {
+            manager[methods[opts.method]](opts.url, requestBody, function success(task: NSURLSessionDataTask, data: any) {
                 AFSuccess(resolve, task, data)
             }, function failure(task, error) {
                 AFFailure(resolve, reject, task, error)
