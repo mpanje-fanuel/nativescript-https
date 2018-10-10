@@ -95,51 +95,34 @@ function AFSuccess(resolve, task: NSURLSessionDataTask, data: NSDictionary<strin
 }
 
 function AFFailure(resolve, reject, task: NSURLSessionDataTask, error: NSError) {
-    console.error('AFFailure')
-    // console.log('error.description', error.description)
-    console.log('error.userInfo.description', error.userInfo.description)
-    // console.log('error.localizedDescription', error.localizedDescription)
-    let data: NSData = error.userInfo.valueForKey(AFNetworkingOperationFailingURLResponseDataErrorKey);
-    let body = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding).toString();
-    try {
-        body = JSON.parse(body)
-    } catch (e) {
-    }
+    console.log('nativescript-https: (AFFailure)', error);
 
+    if (error && error.userInfo) {
+        let data: NSData = error.userInfo.valueForKey(AFNetworkingOperationFailingURLResponseDataErrorKey);
+        let body = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding).toString();
+        try {
+            body = JSON.parse(body)
+        } catch (e) {
+            console.log('nativescript-https: (AFFailure) JSON Parse Error', e, e.stack);
+        }
 
-    let content: any = {
-        body,
-        description: error.description,
-        reason: error.localizedDescription,
-        url: null
-    };
-    // console.log('content.url', content.url)
-    // try {
-    // 	content.body = JSON.parse(body.description)
-    // } catch (e) {
-    if (policies.secured == true) {
-        // console.log('error.description', error.description)
-        // console.log('error.userInfo.description', error.userInfo.description)
-        content.description = 'nativescript-https > Invalid SSL certificate! ' + content.description
-        // return reject(content)
+        let content: any = {
+            body,
+            description: error.description,
+            reason: error.localizedDescription,
+            url: null
+        };
+
+        if (policies.secured == true) {
+            content.description = 'nativescript-https > Invalid SSL certificate! ' + content.description
+        }
+
+        let reason = error.localizedDescription;
+        resolve({task, content, reason})
+    } else {
+        console.log('nativescript-https: (AFFailure) Error but not content...');
+        resolve({task});
     }
-    // }
-    // console.log('error.description', error.description)
-    // console.keys('error', error)
-    // console.keys('error.userInfo', error.userInfo)
-    // error.userInfo.enumerateKeysAndObjectsUsingBlock(function(k, v) {
-    // 	console.log('k', k)
-    // 	console.log('v.description', v.description)
-    // })
-    // let keys = error.userInfo.allKeysForObject(error.userInfo)
-    // console.log('keys.description', keys.description)
-    // let url = error.valueForKey('URL')
-    // console.error('url', url)
-    // if (!isNullOrUndefined(task.response)) {
-    // 	content.URL = task.response.URL
-    // }
-    let reason = error.localizedDescription;
-    resolve({task, content, reason})
 }
 
 export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsResponse> {
@@ -153,10 +136,7 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
                 manager.responseSerializer = AFJSONResponseSerializer.serializerWithReadingOptions(NSJSONReadingOptions.AllowFragments)
             } else {
                 manager.requestSerializer = AFHTTPRequestSerializer.serializer()
-                // manager.responseSerializer = AFXMLParserResponseSerializer.serializer()
-                // manager.responseSerializer = AFHTTPResponseSerializer.serializer()
-                // manager.responseSerializer.acceptableContentTypes = NSSet.setWithObject('text/html')
-                // manager.responseSerializer.acceptableContentTypes = NSSet.setWithObject('application/json')
+
             }
             manager.requestSerializer.allowsCellularAccess = true;
             manager.securityPolicy = (policies.secured == true) ? policies.secure : policies.def;
@@ -194,19 +174,6 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
                 AFFailure(resolve, reject, task, error)
             })
 
-            // if (opts.method == 'GET') {
-            // 	manager.GETParametersSuccessFailure(opts.url, dict, function success(task: NSURLSessionDataTask, data: any) {
-            // 		AFSuccess(resolve, task, data)
-            // 	}, function failure(task, error) {
-            // 		AFFailure(resolve, reject, task, error)
-            // 	})
-            // } else if (opts.method == 'POST') {
-            // 	manager.POSTParametersSuccessFailure(opts.url, dict, function success(task: NSURLSessionDataTask, data: any) {
-            // 		AFSuccess(resolve, task, data)
-            // 	}, function failure(task, error) {
-            // 		AFFailure(resolve, reject, task, error)
-            // 	})
-            // }
 
         } catch (error) {
             reject(error)
