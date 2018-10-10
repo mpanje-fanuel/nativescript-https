@@ -27,6 +27,7 @@ function disableSSLPinning() {
 }
 exports.disableSSLPinning = disableSSLPinning;
 function request(options) {
+    console.log("nativescript-https: (request) Request: ", options);
     return new Promise(function (resolve, reject) {
         try {
             var request_1 = NSMutableURLRequest.requestWithURL(NSURL.URLWithString(options.url));
@@ -42,11 +43,14 @@ function request(options) {
             var manager = AFHTTPSessionManager.manager();
             manager.requestSerializer.allowsCellularAccess = true;
             manager.securityPolicy = (policies.secured == true) ? policies.secure : policies.def;
+            console.log("nativescript-https: (request) AF Send: ", request_1);
             manager.session.dataTaskWithRequestCompletionHandler(request_1, function (data, response, error) {
                 if (error) {
+                    console.log("nativescript-https: (request) AF Send Error", error);
                     reject(new Error(error.localizedDescription));
                 }
                 else {
+                    console.log("nativescript-https: (request) AF Send Response", data);
                     resolve({
                         content: function (data) {
                             var content = NSString.alloc().initWithDataEncoding(data, NSASCIIStringEncoding).toString();
@@ -66,10 +70,12 @@ function request(options) {
             reject(error);
         }
     }).then(function (AFResponse) {
+        console.log("nativescript-https: (request) AF Send Then");
         var send = {
             content: AFResponse.content,
             headers: {},
         };
+        console.log("nativescript-https: (request) AF Send Then", send);
         var response = AFResponse.task.response;
         if (!types_1.isNullOrUndefined(response)) {
             send.statusCode = response.statusCode;
@@ -81,6 +87,7 @@ function request(options) {
         if (AFResponse.reason) {
             send.reason = AFResponse.reason;
         }
+        console.log("nativescript-https: (request) AF Send Then Done ? ");
         return Promise.resolve(send);
     });
 }
