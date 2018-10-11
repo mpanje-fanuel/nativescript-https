@@ -50,20 +50,16 @@ function request(options) {
                     reject(new Error(error.localizedDescription));
                 }
                 else {
+                    var content = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding).toString();
+                    console.log("nativescript-https: (request) AF Send Response", content);
+                    try {
+                        content = JSON.parse(content);
+                    }
+                    catch (e) {
+                        console.log("nativescript-https: Response JSON Parse Error", e, e.stack, content);
+                    }
                     resolve({
-                        content: function (data) {
-                            var content = NSString.alloc().initWithDataEncoding(data, NSASCIIStringEncoding).toString();
-                            console.log("nativescript-https: (request) AF Send Response", content);
-                            try {
-                                content = JSON.parse(content);
-                            }
-                            catch (e) {
-                                console.log("nativescript-https: Response JSON Parse Error", e, e.stack, content);
-                            }
-                            return {
-                                content: content
-                            };
-                        }
+                        content: content
                     });
                 }
             }).resume();
