@@ -46,7 +46,6 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
     return new Promise(function (resolve, reject) {
         try {
 
-
             let url;
             const params = <HttpsRequestObject>options.params;
             if (params) {

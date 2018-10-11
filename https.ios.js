@@ -55,9 +55,11 @@ function request(options) {
                     request_1.setValueForHTTPHeaderField(headers_1[key], key);
                 });
             }
-            var body = options && options.body ? options.body : null;
-            var jsonString = NSString.stringWithString(JSON.stringify(body));
-            request_1.HTTPBody = jsonString.dataUsingEncoding(NSUTF8StringEncoding);
+            if (options.body) {
+                var body = options && options.body ? options.body : null;
+                var jsonString = NSString.stringWithString(JSON.stringify(body));
+                request_1.HTTPBody = jsonString.dataUsingEncoding(NSUTF8StringEncoding);
+            }
             var manager = AFHTTPSessionManager.manager();
             manager.requestSerializer.allowsCellularAccess = true;
             manager.securityPolicy = (policies.secured == true) ? policies.secure : policies.def;
