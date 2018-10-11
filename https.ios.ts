@@ -29,10 +29,7 @@ export function enableSSLPinning(options: Https.HttpsSSLPinningOptions) {
         let validatesDomainName = (isDefined(options.validatesDomainName)) ? options.validatesDomainName : true;
         policies.secure.validatesDomainName = validatesDomainName;
         let data = NSData.dataWithContentsOfFile(options.certificate);
-        // console.log('data.description', data.description)
-        // console.log('data.bytes', data.bytes)
-        // console.log('data.base64Encoding()', data.base64Encoding())
-        // console.log('data.length', data.length)
+
         policies.secure.pinnedCertificates = NSSet.setWithObject(data)
     }
     policies.secured = true;
@@ -84,7 +81,6 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
 
             if (options.body) {
                 const body = options && options.body ? options.body : null;
-
                 let jsonString = NSString.stringWithString(JSON.stringify(body));
                 request.HTTPBody = jsonString.dataUsingEncoding(NSUTF8StringEncoding);
             }
