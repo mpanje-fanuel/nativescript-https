@@ -50,10 +50,10 @@ function request(options) {
                     reject(new Error(error.localizedDescription));
                 }
                 else {
-                    console.log("nativescript-https: (request) AF Send Response", data);
                     resolve({
                         content: function (data) {
                             var content = NSString.alloc().initWithDataEncoding(data, NSASCIIStringEncoding).toString();
+                            console.log("nativescript-https: (request) AF Send Response", content);
                             try {
                                 content = JSON.parse(content);
                             }

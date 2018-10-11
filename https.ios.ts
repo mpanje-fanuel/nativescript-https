@@ -75,20 +75,19 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
                     console.log("nativescript-https: (request) AF Send Error", error);
                     reject(new Error(error.localizedDescription));
                 } else {
-                    resolve({
-                        content: (data: NSData) => {
-                            let content = NSString.alloc().initWithDataEncoding(data, NSASCIIStringEncoding).toString();
-                            console.log("nativescript-https: (request) AF Send Response", content);
-                            try {
-                                content = JSON.parse(content);
-                            } catch (e) {
-                                console.log("nativescript-https: Response JSON Parse Error", e, e.stack, content);
-                            }
-                            return <HttpsResponse>{
-                                content: content
-                            };
-                        }
-                    })
+
+                    let content = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding).toString();
+
+                    console.log("nativescript-https: (request) AF Send Response", content);
+                    try {
+                        content = JSON.parse(content);
+                    } catch (e) {
+                        console.log("nativescript-https: Response JSON Parse Error", e, e.stack, content);
+                    }
+
+                    resolve(<HttpsResponse>{
+                        content: content
+                    });
                 }
             }).resume();
         } catch (error) {
