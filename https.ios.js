@@ -52,6 +52,8 @@ function request(options) {
                 else {
                     var content = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding).toString();
                     console.log("nativescript-https: (request) AF Send Response", content);
+                    console.log("data", data.length);
+                    console.log("data", data.description);
                     try {
                         content = JSON.parse(content);
                     }
