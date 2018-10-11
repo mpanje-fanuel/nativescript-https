@@ -34,11 +34,15 @@ function request(options) {
             var params = options.params;
             if (params) {
                 url = NSURLComponents.componentsWithString(options.url);
+                console.log(url);
+                var queryItems = NSMutableArray.new();
                 for (var paramsKey in params) {
                     var value = params[paramsKey];
                     var queryItem = NSURLQueryItem.queryItemWithNameValue(paramsKey, String(value));
-                    url.queryItems.arrayByAddingObject(queryItem);
+                    queryItems.addObject(queryItem);
                 }
+                url.queryItems = NSArray.arrayWithArray(queryItems);
+                url = url.URL;
             }
             else {
                 url = NSURL.URLWithString(options.url);
