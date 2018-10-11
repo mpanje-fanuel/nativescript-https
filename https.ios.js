@@ -30,7 +30,20 @@ function request(options) {
     console.log("nativescript-https: (request) Request: ", options);
     return new Promise(function (resolve, reject) {
         try {
-            var request_1 = NSMutableURLRequest.requestWithURL(NSURL.URLWithString(options.url));
+            var url = void 0;
+            var params = options.params;
+            if (params) {
+                url = NSURLComponents.componentsWithString(options.url);
+                for (var paramsKey in params) {
+                    var value = params[paramsKey];
+                    var queryItem = NSURLQueryItem.queryItemWithNameValue(paramsKey, String(value));
+                    url.queryItems.arrayByAddingObject(queryItem);
+                }
+            }
+            else {
+                url = NSURL.URLWithString(options.url);
+            }
+            var request_1 = NSMutableURLRequest.requestWithURL(url);
             request_1.HTTPMethod = options.method;
             var headers_1 = options.headers;
             if (headers_1) {
@@ -38,7 +51,8 @@ function request(options) {
                     request_1.setValueForHTTPHeaderField(headers_1[key], key);
                 });
             }
-            var jsonString = NSString.stringWithString(JSON.stringify(options.body));
+            var body = options && options.body ? options.body : null;
+            var jsonString = NSString.stringWithString(JSON.stringify(body));
             request_1.HTTPBody = jsonString.dataUsingEncoding(NSUTF8StringEncoding);
             var manager = AFHTTPSessionManager.manager();
             manager.requestSerializer.allowsCellularAccess = true;
@@ -61,7 +75,8 @@ function request(options) {
                         console.log("nativescript-https: Response JSON Parse Error", e, e.stack, content);
                     }
                     resolve({
-                        content: content
+                        content: content,
+                        statusCode: response.statusCode
                     });
                 }
             }).resume();

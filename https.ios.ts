@@ -4,7 +4,7 @@ import * as application from 'tns-core-modules/application'
 import {HttpRequestOptions, Headers, HttpResponse} from 'tns-core-modules/http'
 import {isDefined, isNullOrUndefined, isObject} from 'tns-core-modules/utils/types'
 import * as Https from './https.common'
-import {HttpsResponse} from "./https.common";
+import {HttpsRequestObject, HttpsResponse} from "./https.common";
 
 
 interface Ipolicies {
@@ -49,18 +49,36 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
     return new Promise(function (resolve, reject) {
         try {
 
-            let request = NSMutableURLRequest.requestWithURL(
-                NSURL.URLWithString(options.url));
+
+            let url;
+            const params = <HttpsRequestObject>options.params;
+            if (params) {
+
+                url = NSURLComponents.componentsWithString(options.url);
+
+                for (const paramsKey in params) {
+                    const value = params[paramsKey];
+                    const queryItem = NSURLQueryItem.queryItemWithNameValue(paramsKey, String(value));
+                    url.queryItems.arrayByAddingObject(queryItem);
+                }
+            } else {
+                url = NSURL.URLWithString(options.url);
+            }
+
+            let request = NSMutableURLRequest.requestWithURL(url);
+
             request.HTTPMethod = options.method;
 
-            let headers = options.headers;
+            const headers = options.headers;
             if (headers) {
                 Object.keys(headers).forEach(function (key) {
                     request.setValueForHTTPHeaderField(headers[key] as any, key);
                 });
             }
 
-            let jsonString = NSString.stringWithString(JSON.stringify(options.body));
+            const body = options && options.body ? options.body : null;
+
+            let jsonString = NSString.stringWithString(JSON.stringify(body));
             request.HTTPBody = jsonString.dataUsingEncoding(NSUTF8StringEncoding);
 
             let manager = AFHTTPSessionManager.manager();
@@ -90,7 +108,8 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
                     }
 
                     resolve(<HttpsResponse>{
-                        content: content
+                        content: content,
+                        statusCode: response.statusCode
                     });
                 }
             }).resume();
