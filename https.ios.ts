@@ -56,10 +56,12 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
 
                 url = NSURLComponents.componentsWithString(options.url);
 
+                url.queryItems = NSMutableArray.new();
+
                 for (const paramsKey in params) {
                     const value = params[paramsKey];
                     const queryItem = NSURLQueryItem.queryItemWithNameValue(paramsKey, String(value));
-                    url.queryItems.arrayByAddingObject(queryItem);
+                    (<NSMutableArray<NSURLQueryItem>>url.queryItems).addObject(queryItem);
                 }
             } else {
                 url = NSURL.URLWithString(options.url);
