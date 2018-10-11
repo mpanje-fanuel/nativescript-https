@@ -60,35 +60,18 @@ function request(options) {
                             catch (e) {
                                 console.log("nativescript-https: Response JSON Parse Error", e, e.stack, content);
                             }
-                            return content;
+                            return {
+                                content: content
+                            };
                         }
                     });
                 }
-            });
+            }).resume();
         }
         catch (error) {
+            console.log("nativescript-https: (request) AF Error", error, error.stack);
             reject(error);
         }
-    }).then(function (AFResponse) {
-        console.log("nativescript-https: (request) AF Send Then");
-        var send = {
-            content: AFResponse.content,
-            headers: {},
-        };
-        console.log("nativescript-https: (request) AF Send Then", send);
-        var response = AFResponse.task.response;
-        if (!types_1.isNullOrUndefined(response)) {
-            send.statusCode = response.statusCode;
-            var dict = response.allHeaderFields;
-            dict.enumerateKeysAndObjectsUsingBlock(function (k, v) {
-                send.headers[k] = v;
-            });
-        }
-        if (AFResponse.reason) {
-            send.reason = AFResponse.reason;
-        }
-        console.log("nativescript-https: (request) AF Send Then Done ? ");
-        return Promise.resolve(send);
     });
 }
 exports.request = request;

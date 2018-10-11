@@ -109,24 +109,24 @@ function getClient(reload) {
     return Client;
 }
 var strictModeThreadPolicyPermitAll = new android.os.StrictMode.ThreadPolicy.Builder().permitAll().build();
-function request(opts) {
+function request(options) {
     return new Promise(function (resolve, reject) {
         try {
             var client = getClient();
             console.log("Attempting to construct URL");
-            var httpUrl = okhttp3.HttpUrl.parse(opts.url);
+            var httpUrl = okhttp3.HttpUrl.parse(options.url);
             var urlBuilder_1 = httpUrl.newBuilder();
             console.log("Created newBuilder");
-            if (opts.params) {
-                Object.keys(opts.params).forEach(function (param) {
-                    urlBuilder_1.addQueryParameter(param, opts.params[param]);
+            if (options.params) {
+                Object.keys(options.params).forEach(function (param) {
+                    urlBuilder_1.addQueryParameter(param, options.params[param]);
                 });
             }
             var request_1 = new okhttp3.Request.Builder();
             request_1.url(urlBuilder_1.build());
-            if (opts.headers) {
-                Object.keys(opts.headers).forEach(function (key) {
-                    request_1.addHeader(key, opts.headers[key]);
+            if (options.headers) {
+                Object.keys(options.headers).forEach(function (key) {
+                    request_1.addHeader(key, options.headers[key]);
                 });
             }
             var methods = {
@@ -137,20 +137,20 @@ function request(opts) {
                 'PUT': 'put',
                 'PATCH': 'patch',
             };
-            if ((['GET', 'HEAD'].indexOf(opts.method) != -1)
+            if ((['GET', 'HEAD'].indexOf(options.method) != -1)
                 ||
-                    (opts.method == 'DELETE' && !types_1.isDefined(opts.body))) {
-                request_1[methods[opts.method]]();
+                    (options.method == 'DELETE' && !types_1.isDefined(options.body))) {
+                request_1[methods[options.method]]();
             }
             else {
-                var type = opts.headers['Content-Type'] || 'application/json';
-                var body = opts.body || {};
+                var type = options.headers['Content-Type'] || 'application/json';
+                var body = options.body || {};
                 try {
                     body = JSON.stringify(body);
                 }
                 catch (e) {
                 }
-                request_1[methods[opts.method]](okhttp3.RequestBody.create(okhttp3.MediaType.parse("text/plain"), body));
+                request_1[methods[options.method]](okhttp3.RequestBody.create(okhttp3.MediaType.parse(type), body));
             }
             android.os.StrictMode.setThreadPolicy(strictModeThreadPolicyPermitAll);
             client.newCall(request_1.build()).enqueue(new okhttp3.Callback({
