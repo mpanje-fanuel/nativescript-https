@@ -79,6 +79,10 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
                     let content = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding).toString();
 
                     console.log("nativescript-https: (request) AF Send Response", content);
+
+                    console.log("data", data.length);
+                    console.log("data", data.description);
+
                     try {
                         content = JSON.parse(content);
                     } catch (e) {
