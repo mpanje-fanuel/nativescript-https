@@ -82,10 +82,12 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
                 });
             }
 
-            const body = options && options.body ? options.body : null;
+            if (options.body) {
+                const body = options && options.body ? options.body : null;
 
-            let jsonString = NSString.stringWithString(JSON.stringify(body));
-            request.HTTPBody = jsonString.dataUsingEncoding(NSUTF8StringEncoding);
+                let jsonString = NSString.stringWithString(JSON.stringify(body));
+                request.HTTPBody = jsonString.dataUsingEncoding(NSUTF8StringEncoding);
+            }
 
             let manager = AFHTTPSessionManager.manager();
 
