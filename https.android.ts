@@ -153,26 +153,26 @@ function getClient(reload: boolean = false): okhttp3.OkHttpClient {
 // No time for that now, and actually it only concerns the '.string()' call of response.body().string() below.
 const strictModeThreadPolicyPermitAll = new android.os.StrictMode.ThreadPolicy.Builder().permitAll().build();
 
-export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsResponse> {
+export function request(options: Https.HttpsRequestOptions): Promise<Https.HttpsResponse> {
     return new Promise(function (resolve, reject) {
         try {
             let client = getClient();
             console.log("Attempting to construct URL");
-            const httpUrl: okhttp3.HttpUrl = okhttp3.HttpUrl.parse(opts.url);
+            const httpUrl: okhttp3.HttpUrl = okhttp3.HttpUrl.parse(options.url);
             const urlBuilder = httpUrl.newBuilder();
             console.log("Created newBuilder");
-            if (opts.params) {
-                Object.keys(opts.params).forEach(param => {
-                    urlBuilder.addQueryParameter(param, opts.params[param] as any);
+            if (options.params) {
+                Object.keys(options.params).forEach(param => {
+                    urlBuilder.addQueryParameter(param, options.params[param] as any);
                 })
             }
 
             let request = new okhttp3.Request.Builder();
             request.url(urlBuilder.build());
 
-            if (opts.headers) {
-                Object.keys(opts.headers).forEach(function (key) {
-                    request.addHeader(key, opts.headers[key] as any)
+            if (options.headers) {
+                Object.keys(options.headers).forEach(function (key) {
+                    request.addHeader(key, options.headers[key] as any)
                 })
             }
 
@@ -187,19 +187,21 @@ export function request(opts: Https.HttpsRequestOptions): Promise<Https.HttpsRes
                 'PATCH': 'patch',
             };
             if (
-                (['GET', 'HEAD'].indexOf(opts.method) != -1)
+                (['GET', 'HEAD'].indexOf(options.method) != -1)
                 ||
-                (opts.method == 'DELETE' && !isDefined(opts.body))
+                (options.method == 'DELETE' && !isDefined(options.body))
             ) {
-                request[methods[opts.method]]()
+                request[methods[options.method]]()
             } else {
-                let type = <string>opts.headers['Content-Type'] || 'application/json';
-                let body = <any>opts.body || {};
+                let type = <string>options.headers['Content-Type'] || 'application/json';
+                let body = <any>options.body || {};
+
                 try {
                     body = JSON.stringify(body)
                 } catch (e) {
                 }
-                request[methods[opts.method]](okhttp3.RequestBody.create(
+
+                request[methods[options.method]](okhttp3.RequestBody.create(
                     okhttp3.MediaType.parse(type),
                     body
                 ))

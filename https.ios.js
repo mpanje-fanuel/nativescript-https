@@ -27,9 +27,27 @@ function disableSSLPinning() {
 }
 exports.disableSSLPinning = disableSSLPinning;
 function request(options) {
+    console.log("nativescript-https: (request) Request: ", options);
     return new Promise(function (resolve, reject) {
         try {
-            var request_1 = NSMutableURLRequest.requestWithURL(NSURL.URLWithString(options.url));
+            var url = void 0;
+            var params = options.params;
+            if (params) {
+                url = NSURLComponents.componentsWithString(options.url);
+                console.log(url);
+                var queryItems = NSMutableArray.new();
+                for (var paramsKey in params) {
+                    var value = params[paramsKey];
+                    var queryItem = NSURLQueryItem.queryItemWithNameValue(paramsKey, String(value));
+                    queryItems.addObject(queryItem);
+                }
+                url.queryItems = NSArray.arrayWithArray(queryItems);
+                url = url.URL;
+            }
+            else {
+                url = NSURL.URLWithString(options.url);
+            }
+            var request_1 = NSMutableURLRequest.requestWithURL(url);
             request_1.HTTPMethod = options.method;
             var headers_1 = options.headers;
             if (headers_1) {
@@ -37,51 +55,42 @@ function request(options) {
                     request_1.setValueForHTTPHeaderField(headers_1[key], key);
                 });
             }
-            var jsonString = NSString.stringWithString(JSON.stringify(options.body));
-            request_1.HTTPBody = jsonString.dataUsingEncoding(NSUTF8StringEncoding);
+            if (options.body) {
+                var body = options && options.body ? options.body : null;
+                var jsonString = NSString.stringWithString(JSON.stringify(body));
+                request_1.HTTPBody = jsonString.dataUsingEncoding(NSUTF8StringEncoding);
+            }
             var manager = AFHTTPSessionManager.manager();
             manager.requestSerializer.allowsCellularAccess = true;
             manager.securityPolicy = (policies.secured == true) ? policies.secure : policies.def;
+            console.log("nativescript-https: (request) AF Send: ", request_1);
             manager.session.dataTaskWithRequestCompletionHandler(request_1, function (data, response, error) {
                 if (error) {
+                    console.log("nativescript-https: (request) AF Send Error", error);
                     reject(new Error(error.localizedDescription));
                 }
                 else {
+                    var content = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding).toString();
+                    console.log("nativescript-https: (request) AF Send Response", content);
+                    console.log("data", data.length);
+                    console.log("data", data.description);
+                    try {
+                        content = JSON.parse(content);
+                    }
+                    catch (e) {
+                        console.log("nativescript-https: Response JSON Parse Error", e, e.stack, content);
+                    }
                     resolve({
-                        content: function (data) {
-                            var content = NSString.alloc().initWithDataEncoding(data, NSASCIIStringEncoding).toString();
-                            try {
-                                content = JSON.parse(content);
-                            }
-                            catch (e) {
-                                console.log("nativescript-https: Response JSON Parse Error", e, e.stack, content);
-                            }
-                            return content;
-                        }
+                        content: content,
+                        statusCode: response.statusCode
                     });
                 }
-            });
+            }).resume();
         }
         catch (error) {
+            console.log("nativescript-https: (request) AF Error", error, error.stack);
             reject(error);
         }
-    }).then(function (AFResponse) {
-        var send = {
-            content: AFResponse.content,
-            headers: {},
-        };
-        var response = AFResponse.task.response;
-        if (!types_1.isNullOrUndefined(response)) {
-            send.statusCode = response.statusCode;
-            var dict = response.allHeaderFields;
-            dict.enumerateKeysAndObjectsUsingBlock(function (k, v) {
-                send.headers[k] = v;
-            });
-        }
-        if (AFResponse.reason) {
-            send.reason = AFResponse.reason;
-        }
-        return Promise.resolve(send);
     });
 }
 exports.request = request;

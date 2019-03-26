@@ -4,6 +4,7 @@ import * as application from 'tns-core-modules/application'
 import {HttpRequestOptions, Headers, HttpResponse} from 'tns-core-modules/http'
 import {isDefined, isNullOrUndefined, isObject} from 'tns-core-modules/utils/types'
 import * as Https from './https.common'
+import {HttpsRequestObject, HttpsResponse} from "./https.common";
 
 
 interface Ipolicies {
@@ -28,10 +29,7 @@ export function enableSSLPinning(options: Https.HttpsSSLPinningOptions) {
         let validatesDomainName = (isDefined(options.validatesDomainName)) ? options.validatesDomainName : true;
         policies.secure.validatesDomainName = validatesDomainName;
         let data = NSData.dataWithContentsOfFile(options.certificate);
-        // console.log('data.description', data.description)
-        // console.log('data.bytes', data.bytes)
-        // console.log('data.base64Encoding()', data.base64Encoding())
-        // console.log('data.length', data.length)
+
         policies.secure.pinnedCertificates = NSSet.setWithObject(data)
     }
     policies.secured = true;
@@ -48,19 +46,43 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
     return new Promise(function (resolve, reject) {
         try {
 
-            let request = NSMutableURLRequest.requestWithURL(
-                NSURL.URLWithString(options.url));
+            let url;
+            const params = <HttpsRequestObject>options.params;
+            if (params) {
+
+                url = NSURLComponents.componentsWithString(options.url);
+
+                console.log(url);
+                let queryItems = NSMutableArray.new();
+
+                for (const paramsKey in params) {
+                    const value = params[paramsKey];
+                    const queryItem = NSURLQueryItem.queryItemWithNameValue(paramsKey, String(value));
+                    queryItems.addObject(queryItem);
+                }
+                url.queryItems = NSArray.arrayWithArray(queryItems);
+                url = url.URL;
+
+            } else {
+                url = NSURL.URLWithString(options.url);
+            }
+
+            let request = NSMutableURLRequest.requestWithURL(url);
+
             request.HTTPMethod = options.method;
 
-            let headers = options.headers;
+            const headers = options.headers;
             if (headers) {
                 Object.keys(headers).forEach(function (key) {
                     request.setValueForHTTPHeaderField(headers[key] as any, key);
                 });
             }
 
-            let jsonString = NSString.stringWithString(JSON.stringify(options.body));
-            request.HTTPBody = jsonString.dataUsingEncoding(NSUTF8StringEncoding);
+            if (options.body) {
+                const body = options && options.body ? options.body : null;
+                let jsonString = NSString.stringWithString(JSON.stringify(body));
+                request.HTTPBody = jsonString.dataUsingEncoding(NSUTF8StringEncoding);
+            }
 
             let manager = AFHTTPSessionManager.manager();
 
@@ -74,53 +96,31 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
                     console.log("nativescript-https: (request) AF Send Error", error);
                     reject(new Error(error.localizedDescription));
                 } else {
-                    console.log("nativescript-https: (request) AF Send Response", data);
-                    resolve({
-                        content: (data: NSData) => {
-                            let content = NSString.alloc().initWithDataEncoding(data, NSASCIIStringEncoding).toString();
-                            try {
-                                content = JSON.parse(content);
-                            } catch (e) {
-                                console.log("nativescript-https: Response JSON Parse Error", e, e.stack, content);
-                            }
-                            return content;
-                        }
-                    })
-                }
-            });
 
+                    let content = NSString.alloc().initWithDataEncoding(data, NSUTF8StringEncoding).toString();
+
+                    console.log("nativescript-https: (request) AF Send Response", content);
+
+                    console.log("data", data.length);
+                    console.log("data", data.description);
+
+                    try {
+                        content = JSON.parse(content);
+                    } catch (e) {
+                        console.log("nativescript-https: Response JSON Parse Error", e, e.stack, content);
+                    }
+
+                    resolve(<HttpsResponse>{
+                        content: content,
+                        statusCode: response.statusCode
+                    });
+                }
+            }).resume();
         } catch (error) {
+            console.log("nativescript-https: (request) AF Error", error, error.stack);
             reject(error)
         }
-
-    }).then(function (AFResponse: {
-        task: NSURLSessionDataTask
-        content: any
-        reason?: string
-    }) {
-        console.log("nativescript-https: (request) AF Send Then");
-        let send: Https.HttpsResponse = {
-            content: AFResponse.content,
-            headers: {},
-        };
-
-        console.log("nativescript-https: (request) AF Send Then", send);
-
-        let response = AFResponse.task.response as NSHTTPURLResponse;
-        if (!isNullOrUndefined(response)) {
-            send.statusCode = response.statusCode;
-            let dict = response.allHeaderFields;
-            dict.enumerateKeysAndObjectsUsingBlock(function (k, v) {
-                send.headers[k] = v
-            })
-        }
-        if (AFResponse.reason) {
-            send.reason = AFResponse.reason
-        }
-        console.log("nativescript-https: (request) AF Send Then Done ? ");
-        return Promise.resolve(send)
-
-    })
+    });
 }
 
 export * from './https.common'
