@@ -118,10 +118,13 @@ function request(options) {
             var urlBuilder_1 = httpUrl.newBuilder();
             console.log("Created newBuilder");
             if (options.params) {
+                console.log('Adding params');
                 Object.keys(options.params).forEach(function (param) {
                     urlBuilder_1.addQueryParameter(param, options.params[param]);
                 });
+                console.log('Added params');
             }
+            console.log('Creating request builder');
             var request_1 = new okhttp3.Request.Builder();
             request_1.url(urlBuilder_1.build());
             if (options.headers) {
@@ -153,26 +156,28 @@ function request(options) {
                 request_1[methods[options.method]](okhttp3.RequestBody.create(okhttp3.MediaType.parse(type), body));
             }
             android.os.StrictMode.setThreadPolicy(strictModeThreadPolicyPermitAll);
+            console.log("Sending OkHttp request");
             client.newCall(request_1.build()).enqueue(new okhttp3.Callback({
                 onResponse: function (task, response) {
-                    var content = response.body().string();
+                    console.log("Handling response!");
                     try {
-                        content = JSON.parse(content);
+                        var content = response.body().string();
+                        try {
+                            content = JSON.parse(content);
+                        }
+                        catch (e) {
+                        }
+                        var statusCode = response.code();
+                        var headers = {};
+                        resolve({ content: content, statusCode: statusCode, headers: headers });
                     }
                     catch (e) {
+                        console.log('Error trying to parse response', e);
+                        reject('Thew was a problem trying to parse the response');
                     }
-                    var statusCode = response.code();
-                    var headers = {};
-                    var heads = response.headers();
-                    var i, len = heads.size();
-                    for (i = 0; i < len; i++) {
-                        var key = heads.name(i);
-                        var value = heads.value(i);
-                        headers[key] = value;
-                    }
-                    resolve({ content: content, statusCode: statusCode, headers: headers });
                 },
                 onFailure: function (task, error) {
+                    console.log("There was an error!");
                     reject(error);
                 },
             }));
