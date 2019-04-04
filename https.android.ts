@@ -162,14 +162,16 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
             const urlBuilder = httpUrl.newBuilder();
             console.log("Created newBuilder");
             if (options.params) {
+                console.log('Adding params');
                 Object.keys(options.params).forEach(param => {
                     urlBuilder.addQueryParameter(param, options.params[param] as any);
-                })
+                });
+                console.log('Added params');
             }
 
+            console.log('Creating request builder');
             let request = new okhttp3.Request.Builder();
             request.url(urlBuilder.build());
-
             if (options.headers) {
                 Object.keys(options.headers).forEach(function (key) {
                     request.addHeader(key, options.headers[key] as any)
@@ -210,8 +212,10 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
             // enable our policy
             android.os.StrictMode.setThreadPolicy(strictModeThreadPolicyPermitAll);
 
+            console.log("Sending OkHttp request");
             client.newCall(request.build()).enqueue(new okhttp3.Callback({
                 onResponse: function (task, response) {
+                    console.log("Handling response!");
                     // console.log('onResponse')
                     // console.keys('response', response)
                     // console.log('onResponse > response.isSuccessful()', response.isSuccessful())
@@ -232,28 +236,33 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
                     // } catch (error) {
                     // 	return reject(error)
                     // }
-
-                    let content = response.body().string();
                     try {
-                        content = JSON.parse(content)
+                        let content = response.body().string();
+                        try {
+                            content = JSON.parse(content)
+                        } catch (e) {
+                        }
+
+                        let statusCode = response.code();
+
+                        let headers = {};
+                        // let heads: okhttp3.Headers = response.headers();
+                        // let i: number, len: number = heads.size();
+                        // for (i = 0; i < len; i++) {
+                        //     let key = heads.name(i);
+                        //     let value = heads.value(i);
+                        //     headers[key] = value
+                        // }
+
+                        resolve({content, statusCode, headers})
                     } catch (e) {
+                        console.log('Error trying to parse response', e);
+                        reject('Thew was a problem trying to parse the response');
                     }
-
-                    let statusCode = response.code();
-
-                    let headers = {};
-                    let heads: okhttp3.Headers = response.headers();
-                    let i: number, len: number = heads.size();
-                    for (i = 0; i < len; i++) {
-                        let key = heads.name(i);
-                        let value = heads.value(i);
-                        headers[key] = value
-                    }
-
-                    resolve({content, statusCode, headers})
 
                 },
                 onFailure: function (task, error) {
+                    console.log("There was an error!");
                     reject(error)
                 },
             }))
