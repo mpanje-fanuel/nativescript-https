@@ -113,18 +113,13 @@ function request(options) {
     return new Promise(function (resolve, reject) {
         try {
             var client = getClient();
-            console.log("Attempting to construct URL");
             var httpUrl = okhttp3.HttpUrl.parse(options.url);
             var urlBuilder_1 = httpUrl.newBuilder();
-            console.log("Created newBuilder");
             if (options.params) {
-                console.log('Adding params');
                 Object.keys(options.params).forEach(function (param) {
                     urlBuilder_1.addQueryParameter(param, options.params[param]);
                 });
-                console.log('Added params');
             }
-            console.log('Creating request builder');
             var request_1 = new okhttp3.Request.Builder();
             request_1.url(urlBuilder_1.build());
             if (options.headers) {
@@ -156,23 +151,21 @@ function request(options) {
                 request_1[methods[options.method]](okhttp3.RequestBody.create(okhttp3.MediaType.parse(type), body));
             }
             android.os.StrictMode.setThreadPolicy(strictModeThreadPolicyPermitAll);
-            console.log("Sending OkHttp request");
             client.newCall(request_1.build()).enqueue(new okhttp3.Callback({
                 onResponse: function (task, response) {
-                    console.log("Handling response!");
                     try {
                         var content = response.body().string();
                         try {
                             content = JSON.parse(content);
                         }
                         catch (e) {
+                            console.log('Error caught ', e);
                         }
                         var statusCode = response.code();
                         var headers = {};
                         resolve({ content: content, statusCode: statusCode, headers: headers });
                     }
                     catch (e) {
-                        console.log('Error trying to parse response', e);
                         reject('Thew was a problem trying to parse the response');
                     }
                 },

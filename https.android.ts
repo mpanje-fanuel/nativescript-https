@@ -157,19 +157,14 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
     return new Promise(function (resolve, reject) {
         try {
             let client = getClient();
-            console.log("Attempting to construct URL");
             const httpUrl: okhttp3.HttpUrl = okhttp3.HttpUrl.parse(options.url);
             const urlBuilder = httpUrl.newBuilder();
-            console.log("Created newBuilder");
             if (options.params) {
-                console.log('Adding params');
                 Object.keys(options.params).forEach(param => {
                     urlBuilder.addQueryParameter(param, options.params[param] as any);
                 });
-                console.log('Added params');
             }
 
-            console.log('Creating request builder');
             let request = new okhttp3.Request.Builder();
             request.url(urlBuilder.build());
             if (options.headers) {
@@ -212,10 +207,8 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
             // enable our policy
             android.os.StrictMode.setThreadPolicy(strictModeThreadPolicyPermitAll);
 
-            console.log("Sending OkHttp request");
             client.newCall(request.build()).enqueue(new okhttp3.Callback({
                 onResponse: function (task, response) {
-                    console.log("Handling response!");
                     // console.log('onResponse')
                     // console.keys('response', response)
                     // console.log('onResponse > response.isSuccessful()', response.isSuccessful())
@@ -239,8 +232,9 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
                     try {
                         let content = response.body().string();
                         try {
-                            content = JSON.parse(content)
+                            content = JSON.parse(content);
                         } catch (e) {
+                            console.log('Error caught ', e);
                         }
 
                         let statusCode = response.code();
@@ -256,7 +250,6 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
 
                         resolve({content, statusCode, headers})
                     } catch (e) {
-                        console.log('Error trying to parse response', e);
                         reject('Thew was a problem trying to parse the response');
                     }
 
