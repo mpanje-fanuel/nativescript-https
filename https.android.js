@@ -105,6 +105,7 @@ function getClient(reload) {
             console.warn('nativescript-https > Undefined host or certificate. SSL pinning NOT working!!!');
         }
     }
+    client.connectTimeout(60, java.util.concurrent.TimeUnit.SECONDS);
     Client = client.build();
     return Client;
 }

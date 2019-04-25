@@ -88,7 +88,7 @@ export function request(options: Https.HttpsRequestOptions): Promise<Https.Https
 
             manager.requestSerializer.allowsCellularAccess = true;
             manager.securityPolicy = (policies.secured == true) ? policies.secure : policies.def;
-
+            manager.requestSerializer.timeoutInterval = 60;
             console.log("nativescript-https: (request) AF Send: ", request);
 
             manager.session.dataTaskWithRequestCompletionHandler(request, function (data: NSData, response: NSHTTPURLResponse, error: NSError) {
