@@ -18,7 +18,7 @@
     "babylon": "latest",
     "lazy": "latest",
     "nativescript-dev-typescript": "latest",
-    "nativescript-dev-webpack": "^0.15.1",
+    "nativescript-dev-webpack": "^1.5.1",
     "tns-platform-declarations": "latest",
     "typescript": "latest"
   }
